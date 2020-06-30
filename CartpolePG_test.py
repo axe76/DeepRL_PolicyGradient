@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed May 27 11:45:37 2020
-
-@author: ACER
-""" 
-    
 import gym
 import numpy as np
 import os
@@ -18,7 +11,7 @@ from keras import optimizers
 import matplotlib.pyplot as plt
 from gym import wrappers
 
-from MountainCar_RBF import plot_running_avg
+
 
 class PolicyModel(object):
 
@@ -76,7 +69,7 @@ class PolicyModel(object):
     def partial_fit(self, S, A, R):
         #print(A)
         onehot_action_taken = np_utils.to_categorical(A, num_classes=self.output_dim)
-        returns = R#compute_discounted_R(R)
+        returns = R
 
         assert S.shape[1] == self.input_dim, "{} != {}".format(S.shape[1], self.input_dim)
         assert onehot_action_taken.shape[0] == S.shape[0], "{} != {}".format(onehot_action_taken.shape[0], S.shape[0])
@@ -85,32 +78,8 @@ class PolicyModel(object):
 
         self.fit_fn([S, onehot_action_taken, returns])
         
-
-def compute_discounted_R(R, discount_rate=.99):
-    discounted_r = np.zeros_like(R, dtype=np.float32)
-    #print(type(R),len(R))
-    running_add = 0
-        
-    for t in range(len(R)):
-        running_add = R[t]
-        discounted_r[t] = running_add
-
-    #discounted_r -= discounted_r.mean() / discounted_r.std()
-
-    return discounted_r    
-
-
-def run_episode(env, model):
-    """Returns an episode reward
-    (1) Play until the game is done
-    (2) The agent will choose an action according to the policy
-    (3) When it's done, it will train from the game play
-    Args:
-        env (gym.env): Gym environment
-        agent (Agent): Game Playing Agent
-    Returns:
-        total_reward (int): total reward earned during the whole episode
-    """
+   
+def episode(env, model):
     done = False
     States = []
     Actions = []
@@ -160,13 +129,13 @@ def main():
         env = gym.make("CartPole-v0")
         input_dim = env.observation_space.shape[0]
         output_dim = env.action_space.n
-        agent = PolicyModel(input_dim, output_dim, [16, 16])
+        model = PolicyModel(input_dim, output_dim, [16, 16])
         total_rewards = [] 
         
         
 
         for episode in range(2000):
-            reward = run_episode(env, agent)
+            reward = episode(env, model)
             total_rewards.append(reward)
             print(episode, reward)
             if episode == 1997:
